@@ -1,1 +1,1 @@
-# Astrolabe
+# Azimuth
