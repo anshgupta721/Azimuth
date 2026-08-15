@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = ["crates/dynamics", "crates/estimation", "crates/frames", "crates/sensors", "crates/time"]
+members = ["crates/dynamics", "crates/estimation", "crates/frames", "crates/math", "crates/sensors", "crates/time"]
 
 [workspace.package]
 name = "azimuth"
