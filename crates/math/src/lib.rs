@@ -1,4 +1,4 @@
-use nalgebra::{SVector, UnitQuaternion, SMatrix, Rotation3};
+use nalgebra::{Rotation3, SMatrix, SVector, UnitQuaternion};
 
 pub type Vec3 = SVector<f64, 3>;
 pub type Mat3 = SMatrix<f64, 3, 3>;
