@@ -7,18 +7,14 @@ pub struct TransferFunction<const N: usize> {
 }
 
 impl<const N: usize> TransferFunction<N> {
-    pub fn new(
-        num: [f64; N],
-        den: [f64; N],
-    ) -> TransferFunction<N> {
+    pub fn new(num: [f64; N], den: [f64; N]) -> TransferFunction<N> {
         TransferFunction { num, den }
     }
 
-    pub fn to_ss<const NX: usize,const NU: usize, const NY: usize>() -> StateSpace<NX, NU, NY> {
+    pub fn to_ss<const NX: usize, const NU: usize, const NY: usize>() -> StateSpace<NX, NU, NY> {
         // Turn this jawn into a state space model
         // StateSpace::<NX,NU,NY>::new(_,_,_,_)
         todo!()
-
     }
 }
 
