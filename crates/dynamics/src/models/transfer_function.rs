@@ -1,24 +1,27 @@
 use super::state_space_model::StateSpace;
 use nalgebra::SMatrix;
 
-pub struct TransferFunction<const MAX_ORDER: usize> {
-    num: [f64; MAX_ORDER + 1],
-    den: [f64; MAX_ORDER + 1],
+pub struct TransferFunction<const N: usize> {
+    num: [f64; N],
+    den: [f64; N],
 }
 
-impl<const MAX_ORDER: usize> TransferFunction<MAX_ORDER> {
+impl<const N: usize> TransferFunction<N> {
     pub fn new(
-        num: [f64; MAX_ORDER + 1],
-        den: [f64; MAX_ORDER + 1],
-    ) -> TransferFunction<MAX_ORDER> {
+        num: [f64; N],
+        den: [f64; N],
+    ) -> TransferFunction<N> {
         TransferFunction { num, den }
     }
 
-    pub fn to_ss() -> StateSpace {
+    pub fn to_ss<const NX: usize,const NU: usize, const NY: usize>() -> StateSpace<NX, NU, NY> {
         // Turn this jawn into a state space model
+        // StateSpace::<NX,NU,NY>::new(_,_,_,_)
+        todo!()
+
     }
 }
 
-pub struct MimoTransferFunction<const INPUTS: usize, const OUTPUTS: usize, const MAX_ORDER: usize> {
-    mimo_tf: SMatrix<TransferFunction<MAX_ORDER>, OUTPUTS, INPUTS>,
+pub struct MimoTransferFunction<const INPUTS: usize, const OUTPUTS: usize, const N: usize> {
+    mimo_tf: SMatrix<TransferFunction<N>, OUTPUTS, INPUTS>,
 }
