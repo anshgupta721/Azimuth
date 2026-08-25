@@ -1,5 +1,5 @@
-use nalgebra::SMatrix;
 use super::state_space_model::StateSpace;
+use nalgebra::SMatrix;
 
 pub struct TransferFunction<const MAX_ORDER: usize> {
     num: [f64; MAX_ORDER + 1],
@@ -7,7 +7,10 @@ pub struct TransferFunction<const MAX_ORDER: usize> {
 }
 
 impl<const MAX_ORDER: usize> TransferFunction<MAX_ORDER> {
-    pub fn new(num: [f64; MAX_ORDER + 1], den: [f64; MAX_ORDER + 1]) -> TransferFunction<MAX_ORDER> {
+    pub fn new(
+        num: [f64; MAX_ORDER + 1],
+        den: [f64; MAX_ORDER + 1],
+    ) -> TransferFunction<MAX_ORDER> {
         TransferFunction { num, den }
     }
 
