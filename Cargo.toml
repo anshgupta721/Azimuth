@@ -9,7 +9,7 @@ version = "0.1.0"
 edition = "2024"
 
 [workspace.dependencies]
-nalgebra = "0.34"
+nalgebra = "0.35.0"
 thiserror = "2"
 
 
