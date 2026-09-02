@@ -1,27 +1,31 @@
 use nalgebra::{SMatrix, SVector};
 
-pub struct StateSpace<const NX: usize, const NU: usize, const NY: usize> {
-    a: SMatrix<f64, NX, NX>,
-    b: SMatrix<f64, NX, NU>,
-    c: SMatrix<f64, NY, NX>,
-    d: SMatrix<f64, NY, NU>,
+pub trait LTVSystem<const NX: usize, const NU: usize, const NY: usize>{
+    fn a(&self, t: f64) -> SMatrix<f64, NX, NX>;
+    fn b(&self, t: f64) -> SMatrix<f64, NX, NU>;
+    fn c(&self, t: f64) -> SMatrix<f64, NY, NX>;
+    fn d(&self, t: f64) -> SMatrix<f64, NY, NU>;
 }
 
-impl<const NX: usize, const NU: usize, const NY: usize> StateSpace<NX, NU, NY> {
+// pub trait LTISystem<const NX: usize, const NU: usize, const NY: usize
+
+pub struct StateSpace<S, const NX: usize, const NU: usize, const NY: usize> {
+    system: S,
+}
+
+impl<S, const NX: usize, const NU: usize, const NY: usize> StateSpace<S, NX, NU, NY> 
+    where S: LTVSystem<NX, NU, NY>{
     pub fn new(
-        a: SMatrix<f64, NX, NX>,
-        b: SMatrix<f64, NX, NU>,
-        c: SMatrix<f64, NY, NX>,
-        d: SMatrix<f64, NY, NU>,
-    ) -> StateSpace<NX, NU, NY> {
-        StateSpace { a, b, c, d }
+        system: S,
+    ) -> StateSpace<S, NX, NU, NY> {
+        StateSpace { system }
     }
 
-    pub fn derivative(&self, x: SVector<f64, NX>, u: SVector<f64, NU>) -> SVector<f64, NX> {
-        return self.a * x + self.b * u;
+    pub fn derivative(&self, t: f64, x: SVector<f64, NX>, u: SVector<f64, NU>, dx_prev: SVector<f64, NX>) -> SVector<f64, NX> {
+        dx_prev + self.system.a(t) * x + self.system.b(t) * u
     }
 
-    pub fn output(&self, x: SVector<f64, NX>, u: SVector<f64, NU>) -> SVector<f64, NY> {
-        return self.c * x + self.d * u;
+    pub fn output(&self, t: f64, x: SVector<f64, NX>, u: SVector<f64, NU>) -> SVector<f64, NY> {
+        return self.system.c(t) * x + self.system.d(t) * u;
     }
 }
