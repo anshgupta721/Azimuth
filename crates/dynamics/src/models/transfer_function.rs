@@ -1,4 +1,4 @@
-use super::state_space_model::StateSpace;
+// use super::state_space_model::StateSpace;
 use nalgebra::SMatrix;
 
 pub struct TransferFunction<const N: usize> {
@@ -11,11 +11,11 @@ impl<const N: usize> TransferFunction<N> {
         TransferFunction { num, den }
     }
 
-    pub fn to_ss<const NX: usize, const NU: usize, const NY: usize>() -> StateSpace<NX, NU, NY> {
-        // Turn this jawn into a state space model
-        // StateSpace::<NX,NU,NY>::new(_,_,_,_)
-        todo!()
-    }
+    // pub fn to_ss<const NX: usize, const NU: usize, const NY: usize>() -> StateSpace<NX, NU, NY> {
+    //     // Turn this jawn into a state space model
+    //     // StateSpace::<NX,NU,NY>::new(_,_,_,_)
+    //     todo!()
+    // }
 }
 
 pub struct MimoTransferFunction<const INPUTS: usize, const OUTPUTS: usize, const N: usize> {
