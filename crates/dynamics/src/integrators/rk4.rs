@@ -1,7 +1,7 @@
 use nalgebra::SVector;
 
 pub fn rk4<const NX: usize, const NU: usize>(
-    f: &dyn Fn(f64, SVector<f64, NX>, SVector<f64, NU>, SVector<f64, NX>) -> SVector<f64, NX>,
+    f: impl Fn(f64, SVector<f64, NX>, SVector<f64, NU>, SVector<f64, NX>) -> SVector<f64, NX>,
     t: f64,
     dt: f64,
     x: SVector<f64, NX>,
