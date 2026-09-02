@@ -1,2 +1,2 @@
-pub mod models;
 pub mod integrators;
+pub mod models;
