@@ -26,7 +26,7 @@ where
         t: f64,
         x: SVector<f64, NX>,
         u: SVector<f64, NU>,
-        dx0: SVector<f64, NX>
+        dx0: SVector<f64, NX>,
     ) -> SVector<f64, NX> {
         dx0 + self.system.a(t) * x + self.system.b(t) * u
     }
