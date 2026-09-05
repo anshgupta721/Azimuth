@@ -1,6 +1,6 @@
 use nalgebra::SVector;
 
-pub fn rk4<const NX: usize, const NU: usize>(
+pub fn rk4<const NX: usize>(
     f: &dyn Fn(f64, SVector<f64, NX>) -> SVector<f64, NX>,
     t: f64,
     dt: f64,
