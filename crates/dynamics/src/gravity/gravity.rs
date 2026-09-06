@@ -9,7 +9,7 @@ pub trait GravityField {
 }
 
 pub struct PointMass {
-    mu: f64,
+    pub mu: f64,
 }
 
 impl GravityField for PointMass {
