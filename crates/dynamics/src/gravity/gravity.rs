@@ -30,7 +30,7 @@ pub struct SphericalHarmonics {
     pub coeffs: HarmonicCoeffs,
 }
 
-impl SphericalHarmonics{
+impl SphericalHarmonics {
     fn spherical(pos: SVector<f64, 3>) -> (f64, f64, f64) {
         let r = pos.norm();
         let phi = (pos[2] / r).asin();
@@ -67,18 +67,16 @@ impl GravityField for SphericalHarmonics {
         let dv_dphi = self.mu / r * dv_dphi;
         let dv_dlambda = self.mu / r * dv_dlambda;
 
-
         // Spherical -> local components
         let a_r = dv_dr;
         let a_phi = dv_dphi / r;
-        
+
         // Note: singular at the poles (cos_phi -> 0)
         let a_lambda = dv_dlambda / (r * cos_phi);
 
         let ax = (a_r * cos_phi - a_phi * sin_phi) * cos_lam - a_lambda * sin_lam;
         let ay = (a_r * cos_phi - a_phi * sin_phi) * sin_lam + a_lambda * cos_lam;
         let az = a_r * sin_phi + a_phi * cos_phi;
-
 
         [ax, ay, az].into()
     }
@@ -88,11 +86,12 @@ impl GravityField for SphericalHarmonics {
         let leg = LegendreCache::new(self.coeffs.degree(), phi);
 
         let mut v = 0.0;
-        for n in 0..=self.coeffs.degree(){
+        for n in 0..=self.coeffs.degree() {
             let mut term = 0.0;
             for m in 0..=n {
                 let (sin_l, cos_l) = (m as f64 * lambda).sin_cos();
-                term += leg.p[n][m] * (self.coeffs.get_c(n, m) * cos_l + self.coeffs.get_s(n, m) * sin_l);
+                term += leg.p[n][m]
+                    * (self.coeffs.get_c(n, m) * cos_l + self.coeffs.get_s(n, m) * sin_l);
             }
             v += (self.r_ref / r).powi(n as i32) * term;
         }

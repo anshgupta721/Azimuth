@@ -17,15 +17,15 @@ impl HarmonicCoeffs {
         self.s[n][m] = snm;
     }
 
-    pub fn get_c(&self, n: usize, m: usize) -> f64{
+    pub fn get_c(&self, n: usize, m: usize) -> f64 {
         self.c[n][m]
     }
-    
-    pub fn get_s(&self, n: usize, m:usize) -> f64{
+
+    pub fn get_s(&self, n: usize, m: usize) -> f64 {
         self.s[n][m]
     }
 
-    pub fn degree(&self) -> usize{
+    pub fn degree(&self) -> usize {
         self.degree
     }
 }
@@ -45,7 +45,7 @@ impl LegendreCache {
 
         p[0][0] = 1.0;
         // Sectorial (diagonal) recursion: P_nn from P_(n-1)(n-1)
-        if n_max >= 1{
+        if n_max >= 1 {
             p[1][1] = 3.0_f64.sqrt() * t;
         }
         for n in 2..=n_max {
@@ -81,19 +81,19 @@ impl LegendreCache {
         }
 
         for n in 0..=n_max {
-            for m in 0..=n{
+            for m in 0..=n {
                 let n_f = n as f64;
                 let m_f = m as f64;
 
-                let n_nm = if m==n {
+                let n_nm = if m == n {
                     0.0
-                } else if m == 0{
+                } else if m == 0 {
                     (n_f * (n_f + 1.0) / 2.0).sqrt()
                 } else {
                     ((n_f - m_f) * (n_f + m_f + 1.0)).sqrt()
                 };
 
-                let p_next = if m < n { p[n][m+1] } else { 0.0 };
+                let p_next = if m < n { p[n][m + 1] } else { 0.0 };
 
                 dp[n][m] = n_nm * p_next - m_f * (u / t) * p[n][m];
             }
