@@ -16,15 +16,27 @@ impl HarmonicCoeffs {
         self.c[n][m] = cnm;
         self.s[n][m] = snm;
     }
+
+    pub fn get_c(&self, n: usize, m: usize) -> f64{
+        self.c[n][m]
+    }
+    
+    pub fn get_s(&self, n: usize, m:usize) -> f64{
+        self.s[n][m]
+    }
+
+    pub fn degree(&self) -> usize{
+        self.degree
+    }
 }
 
-pub struct LegendreCache {
-    p: Vec<Vec<f64>>,
-    dp: Vec<Vec<f64>>,
+pub(crate) struct LegendreCache {
+    pub p: Vec<Vec<f64>>,
+    pub dp: Vec<Vec<f64>>,
 }
 
 impl LegendreCache {
-    fn new(n_max: usize, phi: f64) -> Self {
+    pub(crate) fn new(n_max: usize, phi: f64) -> Self {
         let u = phi.sin();
         let t = phi.cos();
         let dim = n_max + 1;
@@ -32,15 +44,17 @@ impl LegendreCache {
         let mut dp = vec![vec![0.0; dim + 1]; dim + 1];
 
         p[0][0] = 1.0;
-
         // Sectorial (diagonal) recursion: P_nn from P_(n-1)(n-1)
-        for n in 1..=n_max {
+        if n_max >= 1{
+            p[1][1] = 3.0_f64.sqrt() * t;
+        }
+        for n in 2..=n_max {
             let prev = p[n - 1][n - 1];
             let factor = ((2.0 * n as f64 + 1.0) / (2.0 * n as f64)).sqrt();
             p[n][n] = factor * t * prev;
         }
 
-        for n in 1..n_max {
+        for n in 1..=n_max {
             for m in 0..n {
                 let n_f = n as f64;
                 let m_f = m as f64;
@@ -81,7 +95,6 @@ impl LegendreCache {
 
                 let p_next = if m < n { p[n][m+1] } else { 0.0 };
 
-                dp[n][m] = n_nm * p_next - m_f * t.tan().recip() * 0.0;
                 dp[n][m] = n_nm * p_next - m_f * (u / t) * p[n][m];
             }
         }
