@@ -2,9 +2,9 @@ use nalgebra::SVector;
 
 use crate::gravity::spherical_harmonics::{HarmonicCoeffs, LegendreCache};
 pub trait GravityField {
-    fn acceleration(&mut self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3>;
+    fn acceleration(&self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3>;
     /// Optional: f
-    fn potential(&mut self, pos_body_fixed: SVector<f64, 3>) -> Option<f64>;
+    fn potential(&self, pos_body_fixed: SVector<f64, 3>) -> Option<f64>;
 }
 
 pub struct PointMass {
@@ -12,13 +12,13 @@ pub struct PointMass {
 }
 
 impl GravityField for PointMass {
-    fn acceleration(&mut self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3> {
+    fn acceleration(&self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3> {
         let r = pos_body_fixed.norm();
         let common = -self.mu / r.powf(3.0);
         pos_body_fixed * common
     }
 
-    fn potential(&mut self, pos_body_fixed: SVector<f64, 3>) -> Option<f64> {
+    fn potential(&self, pos_body_fixed: SVector<f64, 3>) -> Option<f64> {
         let r = pos_body_fixed.norm();
         Some((pos_body_fixed * (self.mu / r)).norm())
     }
@@ -40,7 +40,7 @@ impl SphericalHarmonics {
 }
 
 impl GravityField for SphericalHarmonics {
-    fn acceleration(&mut self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3> {
+    fn acceleration(&self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3> {
         let (r, phi, lambda) = Self::spherical(pos_body_fixed);
         let leg = LegendreCache::new(self.coeffs.degree(), phi);
         let (sin_phi, cos_phi) = phi.sin_cos();
@@ -81,7 +81,7 @@ impl GravityField for SphericalHarmonics {
         [ax, ay, az].into()
     }
 
-    fn potential(&mut self, pos_body_fixed: SVector<f64, 3>) -> Option<f64> {
+    fn potential(&self, pos_body_fixed: SVector<f64, 3>) -> Option<f64> {
         let (r, phi, lambda) = Self::spherical(pos_body_fixed);
         let leg = LegendreCache::new(self.coeffs.degree(), phi);
 
