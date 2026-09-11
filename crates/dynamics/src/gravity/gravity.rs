@@ -34,7 +34,7 @@ impl SphericalHarmonics {
     pub fn new(mu: f64, r_ref: f64, coeffs: HarmonicCoeffs) -> Self {
         SphericalHarmonics { mu, r_ref, coeffs }
     }
-    
+
     fn spherical(pos: SVector<f64, 3>) -> (f64, f64, f64) {
         let r = pos.norm();
         let phi = (pos[2] / r).asin();
