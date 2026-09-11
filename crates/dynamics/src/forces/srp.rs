@@ -1,6 +1,7 @@
 use nalgebra::SVector;
 use std::f64::consts::PI;
 
+/// Acceleration outputs in meters/second^2
 pub fn srp_acceleration(
     r_sc: SVector<f64, 3>,
     r_sun: SVector<f64, 3>,
