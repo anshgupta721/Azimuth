@@ -1,10 +1,24 @@
-use nalgebra::SVector;
+use nalgebra::{SMatrix, SVector};
 
 use crate::gravity::spherical_harmonics::{HarmonicCoeffs, LegendreCache};
 pub trait GravityField {
     fn acceleration(&self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3>;
     /// Optional: f
     fn potential(&self, pos_body_fixed: SVector<f64, 3>) -> Option<f64>;
+
+    fn gravity_gradient(&self, pos_body_fixed: SVector<f64, 3>) -> SMatrix<f64, 3, 3> {
+        let mut gradient = SMatrix::<f64, 3, 3>::zeros();
+        let h = SVector::<f64, 3>::new(1.0, 1.0, 1.0); // Step Size
+
+        let accel_plus = self.acceleration(pos_body_fixed + h);
+        let accel_minus = self.acceleration(pos_body_fixed - h);
+
+        for i in 0..3 {
+            gradient.set_column(i, &(accel_plus - accel_minus).component_div(&(2.0 * h)));
+        }
+
+        gradient
+    }
 }
 
 pub struct PointMass {
