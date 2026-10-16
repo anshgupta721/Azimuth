@@ -33,6 +33,7 @@ impl HarmonicCoeffs {
 pub(crate) struct LegendreCache {
     pub p: Vec<Vec<f64>>,
     pub dp: Vec<Vec<f64>>,
+    pub d2p: Vec<Vec<f64>>,
 }
 
 impl LegendreCache {
@@ -42,6 +43,7 @@ impl LegendreCache {
         let dim = n_max + 1;
         let mut p = vec![vec![0.0; dim + 1]; dim + 1];
         let mut dp = vec![vec![0.0; dim + 1]; dim + 1];
+        let mut d2p = vec![vec![0.0; dim + 1]; dim + 1];
 
         p[0][0] = 1.0;
         // Sectorial (diagonal) recursion: P_nn from P_(n-1)(n-1)
@@ -98,7 +100,21 @@ impl LegendreCache {
                 dp[n][m] = n_nm * p_next - m_f * (u / t) * p[n][m];
             }
         }
-
-        LegendreCache { p, dp }
+        for n in 0..=n_max {
+            for m in 0..=n {
+                let n_f = n as f64;
+                let m_f = m as f64;
+                let n_nm = if m == n {
+                    0.0
+                } else if m == 0 {
+                    (n_f * (n_f + 1.0) / 2.0).sqrt()
+                } else {
+                    ((n_f - m_f) * (n_f + m_f + 1.0)).sqrt()
+                };
+                let dp_next = if m < n { dp[n][m + 1] } else { 0.0 };
+                d2p[n][m] = n_nm * dp_next - m_f * (p[n][m] / (t * t) + (u / t) * dp[n][m]);
+            }
+        }
+        LegendreCache { p, dp, d2p }
     }
 }
