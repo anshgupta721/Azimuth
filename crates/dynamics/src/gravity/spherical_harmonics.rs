@@ -115,6 +115,6 @@ impl LegendreCache {
                 d2p[n][m] = n_nm * dp_next - m_f * (p[n][m] / (t * t) + (u / t) * dp[n][m]);
             }
         }
-        LegendreCache { p, dp, d2p }
+        return LegendreCache { p, dp, d2p };
     }
 }
