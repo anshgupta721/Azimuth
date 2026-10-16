@@ -41,12 +41,12 @@ impl GravityField for PointMass {
 pub struct SphericalHarmonics {
     mu: f64,
     r_ref: f64,
-    pub coeffs: HarmonicCoeffs,
+    degree: usize,
 }
 
 impl SphericalHarmonics {
-    pub fn new(mu: f64, r_ref: f64, coeffs: HarmonicCoeffs) -> Self {
-        SphericalHarmonics { mu, r_ref, coeffs }
+    pub fn new(mu: f64, r_ref: f64, degree: usize) -> Self {
+        SphericalHarmonics { mu, r_ref, degree }
     }
 
     fn spherical(pos: SVector<f64, 3>) -> (f64, f64, f64) {
@@ -55,12 +55,10 @@ impl SphericalHarmonics {
         let lambda = pos[1].atan2(pos[0]);
         (r, phi, lambda)
     }
-}
 
-impl GravityField for SphericalHarmonics {
-    fn acceleration(&self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3> {
+    fn acceleration(&self, pos_body_fixed: SVector<f64, 3>, coeffs: &[f64]) -> SVector<f64, 3> {
         let (r, phi, lambda) = Self::spherical(pos_body_fixed);
-        let leg = LegendreCache::new(self.coeffs.degree(), phi);
+        let leg = LegendreCache::new(self.degree, phi);
         let (sin_phi, cos_phi) = phi.sin_cos();
         let (sin_lam, cos_lam) = lambda.sin_cos();
 
@@ -68,7 +66,7 @@ impl GravityField for SphericalHarmonics {
         let mut dv_dphi = 0.0;
         let mut dv_dlambda = 0.0;
 
-        for n in 0..=self.coeffs.degree() {
+        for n in 0..=self.degree {
             let rn = (self.r_ref / r).powi(n as i32);
             for m in 0..=n {
                 let (sin_ml, cos_ml) = (m as f64 * lambda).sin_cos();
@@ -98,7 +96,9 @@ impl GravityField for SphericalHarmonics {
 
         [ax, ay, az].into()
     }
+}
 
+impl GravityField for SphericalHarmonics {
     fn potential(&self, pos_body_fixed: SVector<f64, 3>) -> Option<f64> {
         let (r, phi, lambda) = Self::spherical(pos_body_fixed);
         let leg = LegendreCache::new(self.coeffs.degree(), phi);
