@@ -56,7 +56,10 @@ impl SphericalHarmonics {
         (r, phi, lambda)
     }
 
-    fn acceleration_and_gradient(&self, pos_body_fixed: SVector<f64, 3>) -> (SVector<f64, 3>, SMatrix<f64, 3, 3>) {
+    fn acceleration_and_gradient(
+        &self,
+        pos_body_fixed: SVector<f64, 3>,
+    ) -> (SVector<f64, 3>, SMatrix<f64, 3, 3>) {
         let (r, phi, lambda) = Self::spherical(pos_body_fixed);
         let leg = LegendreCache::new(self.coeffs.degree(), phi);
         let (sin_phi, cos_phi) = phi.sin_cos();
@@ -92,15 +95,12 @@ impl SphericalHarmonics {
                 d2v_dphiphi += rn * cs * leg.d2p[n][m];
                 d2v_dphidlambda += rn * mf * cs_dl * leg.dp[n][m];
                 d2v_dlambdalambda += rn * mf * mf * cs * leg.p[n][m];
-
             }
         }
 
         let dv_dr = -self.mu / (r * r) * dv_dr;
         let dv_dphi = self.mu / r * dv_dphi;
         let dv_dlambda = self.mu / r * dv_dlambda;
-
-
 
         let d2v_drr = self.mu / (r * r * r) * d2v_drr;
         let d2v_drdphi = -self.mu / (r * r) * d2v_drdphi;
@@ -121,8 +121,10 @@ impl SphericalHarmonics {
         let g_rp = d2v_drdphi / r - dv_dphi / (r * r);
         let g_rl = d2v_drdlambda / (r * cos_phi) - dv_dlambda / (r * r * cos_phi);
         let g_pp = d2v_dphiphi / (r * r) + dv_dr / r;
-        let g_pl = d2v_dphidlambda / (r * r * cos_phi * cos_phi) + dv_dlambda * tan_phi / (r * r * cos_phi); //Potentially a single cos instead of squared
-        let g_ll = d2v_dlambdalambda / (r * r * cos_phi * cos_phi) - tan_phi * dv_dphi / (r * r) + dv_dr / r;
+        let g_pl = d2v_dphidlambda / (r * r * cos_phi * cos_phi)
+            + dv_dlambda * tan_phi / (r * r * cos_phi); //Potentially a single cos instead of squared
+        let g_ll = d2v_dlambdalambda / (r * r * cos_phi * cos_phi) - tan_phi * dv_dphi / (r * r)
+            + dv_dr / r;
 
         let gamma = SMatrix::<f64, 3, 3>::new(
             g_rr, g_rp, g_rl, //
@@ -130,12 +132,9 @@ impl SphericalHarmonics {
             g_rl, g_pl, g_ll,
         );
 
-
         let e_r = SVector::<f64, 3>::new(cos_phi * cos_lam, cos_phi * sin_lam, sin_phi);
         let e_phi = SVector::<f64, 3>::new(-sin_phi * cos_lam, -sin_phi * sin_lam, cos_phi);
         let e_lam = SVector::<f64, 3>::new(-sin_lam, cos_lam, 0.0);
-
-
 
         let ax = (a_r * cos_phi - a_phi * sin_phi) * cos_lam - a_lambda * sin_lam;
         let ay = (a_r * cos_phi - a_phi * sin_phi) * sin_lam + a_lambda * cos_lam;
@@ -144,9 +143,6 @@ impl SphericalHarmonics {
         let rot = SMatrix::<f64, 3, 3>::from_columns(&[e_r, e_phi, e_lam]);
 
         let gradient = rot * gamma * rot.transpose();
-
-
-
 
         ([ax, ay, az].into(), gradient)
     }
