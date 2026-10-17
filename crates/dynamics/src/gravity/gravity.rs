@@ -132,6 +132,8 @@ impl SphericalHarmonics {
             g_rl, g_pl, g_ll,
         );
 
+        println!("{}", gamma.trace());
+
         let e_r = SVector::<f64, 3>::new(cos_phi * cos_lam, cos_phi * sin_lam, sin_phi);
         let e_phi = SVector::<f64, 3>::new(-sin_phi * cos_lam, -sin_phi * sin_lam, cos_phi);
         let e_lam = SVector::<f64, 3>::new(-sin_lam, cos_lam, 0.0);
