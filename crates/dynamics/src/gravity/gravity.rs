@@ -56,7 +56,7 @@ impl SphericalHarmonics {
         (r, phi, lambda)
     }
 
-    fn acceleration_and_gradient(
+    pub fn acceleration_and_gradient(
         &self,
         pos_body_fixed: SVector<f64, 3>,
     ) -> (SVector<f64, 3>, SMatrix<f64, 3, 3>) {
