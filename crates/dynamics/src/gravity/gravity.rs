@@ -41,12 +41,12 @@ impl GravityField for PointMass {
 pub struct SphericalHarmonics {
     mu: f64,
     r_ref: f64,
-    pub coeffs: HarmonicCoeffs,
+    degree: usize,
 }
 
 impl SphericalHarmonics {
-    pub fn new(mu: f64, r_ref: f64, coeffs: HarmonicCoeffs) -> Self {
-        SphericalHarmonics { mu, r_ref, coeffs }
+    pub fn new(mu: f64, r_ref: f64, degree: usize) -> Self {
+        SphericalHarmonics { mu, r_ref, degree }
     }
 
     fn spherical(pos: SVector<f64, 3>) -> (f64, f64, f64) {
@@ -59,9 +59,18 @@ impl SphericalHarmonics {
     pub fn acceleration_and_gradient(
         &self,
         pos_body_fixed: SVector<f64, 3>,
+        coeffs: HarmonicCoeffs,
     ) -> (SVector<f64, 3>, SMatrix<f64, 3, 3>) {
+        assert_eq!(
+            coeffs.degree(),
+            self.degree,
+            "coefficient degree ({}) does not match propagator degree ({})",
+            coeffs.degree(),
+            self.degree
+        );
+
         let (r, phi, lambda) = Self::spherical(pos_body_fixed);
-        let leg = LegendreCache::new(self.coeffs.degree(), phi);
+        let leg = LegendreCache::new(self.degree, phi);
         let (sin_phi, cos_phi) = phi.sin_cos();
         let (sin_lam, cos_lam) = lambda.sin_cos();
 
@@ -76,12 +85,12 @@ impl SphericalHarmonics {
         let mut d2v_dphidlambda = 0.0;
         let mut d2v_dlambdalambda = 0.0;
 
-        for n in 0..=self.coeffs.degree() {
+        for n in 0..=coeffs.degree() {
             let rn = (self.r_ref / r).powi(n as i32);
             for m in 0..=n {
                 let (sin_ml, cos_ml) = (m as f64 * lambda).sin_cos();
-                let cs = self.coeffs.get_c(n, m) * cos_ml + self.coeffs.get_s(n, m) * sin_ml;
-                let cs_dl = -self.coeffs.get_c(n, m) * sin_ml + self.coeffs.get_s(n, m) * cos_ml;
+                let cs = coeffs.get_c(n, m) * cos_ml + coeffs.get_s(n, m) * sin_ml;
+                let cs_dl = -coeffs.get_c(n, m) * sin_ml + coeffs.get_s(n, m) * cos_ml;
 
                 dv_dr += (n as f64 + 1.0) * rn * leg.p[n][m] * cs;
                 dv_dphi += rn * leg.dp[n][m] * cs;
@@ -145,18 +154,16 @@ impl SphericalHarmonics {
 
         ([ax, ay, az].into(), gradient)
     }
-
-    fn potential(&self, pos_body_fixed: SVector<f64, 3>) -> Option<f64> {
+    fn potential(&self, pos_body_fixed: SVector<f64, 3>, coeffs: HarmonicCoeffs) -> Option<f64> {
         let (r, phi, lambda) = Self::spherical(pos_body_fixed);
-        let leg = LegendreCache::new(self.coeffs.degree(), phi);
+        let leg = LegendreCache::new(coeffs.degree(), phi);
 
         let mut v = 0.0;
-        for n in 0..=self.coeffs.degree() {
+        for n in 0..=coeffs.degree() {
             let mut term = 0.0;
             for m in 0..=n {
                 let (sin_l, cos_l) = (m as f64 * lambda).sin_cos();
-                term += leg.p[n][m]
-                    * (self.coeffs.get_c(n, m) * cos_l + self.coeffs.get_s(n, m) * sin_l);
+                term += leg.p[n][m] * (coeffs.get_c(n, m) * cos_l + coeffs.get_s(n, m) * sin_l);
             }
             v += (self.r_ref / r).powi(n as i32) * term;
         }
