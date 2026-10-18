@@ -59,7 +59,7 @@ impl SphericalHarmonics {
     pub fn acceleration_and_gradient(
         &self,
         pos_body_fixed: SVector<f64, 3>,
-        coeffs: HarmonicCoeffs,
+        coeffs: &HarmonicCoeffs,
     ) -> (SVector<f64, 3>, SMatrix<f64, 3, 3>) {
         assert_eq!(
             coeffs.degree(),
