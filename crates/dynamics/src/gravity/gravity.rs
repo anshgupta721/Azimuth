@@ -146,5 +146,21 @@ impl SphericalHarmonics {
 
         ([ax, ay, az].into(), gradient)
     }
+    fn potential(&self, pos_body_fixed: SVector<f64, 3>, coeffs: HarmonicCoeffs) -> Option<f64> {
+        let (r, phi, lambda) = Self::spherical(pos_body_fixed);
+        let leg = LegendreCache::new(coeffs.degree(), phi);
+
+        let mut v = 0.0;
+        for n in 0..=coeffs.degree() {
+            let mut term = 0.0;
+            for m in 0..=n {
+                let (sin_l, cos_l) = (m as f64 * lambda).sin_cos();
+                term += leg.p[n][m]
+                    * (coeffs.get_c(n, m) * cos_l + coeffs.get_s(n, m) * sin_l);
+            }
+            v += (self.r_ref / r).powi(n as i32) * term;
+        }
+        Some(self.mu / r * v)
+    }
 }
 
