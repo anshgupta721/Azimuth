@@ -121,7 +121,7 @@ impl SphericalHarmonics {
         let g_rp = d2v_drdphi / r - dv_dphi / (r * r);
         let g_rl = d2v_drdlambda / (r * cos_phi) - dv_dlambda / (r * r * cos_phi);
         let g_pp = d2v_dphiphi / (r * r) + dv_dr / r;
-        let g_pl = d2v_dphidlambda / (r * r * cos_phi * cos_phi)
+        let g_pl = d2v_dphidlambda / (r * r * cos_phi)
             + dv_dlambda * tan_phi / (r * r * cos_phi); //Potentially a single cos instead of squared
         let g_ll = d2v_dlambdalambda / (r * r * cos_phi * cos_phi) - tan_phi * dv_dphi / (r * r)
             + dv_dr / r;
