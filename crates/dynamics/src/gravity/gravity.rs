@@ -59,8 +59,16 @@ impl SphericalHarmonics {
     pub fn acceleration_and_gradient(
         &self,
         pos_body_fixed: SVector<f64, 3>,
-        coeffs: HarmonicCoeffs
+        coeffs: HarmonicCoeffs,
     ) -> (SVector<f64, 3>, SMatrix<f64, 3, 3>) {
+        assert_eq!(
+            coeffs.degree(),
+            self.degree,
+            "coefficient degree ({}) does not match propagator degree ({})",
+            coeffs.degree(),
+            self.degree
+        );
+
         let (r, phi, lambda) = Self::spherical(pos_body_fixed);
         let leg = LegendreCache::new(self.degree, phi);
         let (sin_phi, cos_phi) = phi.sin_cos();
@@ -155,12 +163,10 @@ impl SphericalHarmonics {
             let mut term = 0.0;
             for m in 0..=n {
                 let (sin_l, cos_l) = (m as f64 * lambda).sin_cos();
-                term += leg.p[n][m]
-                    * (coeffs.get_c(n, m) * cos_l + coeffs.get_s(n, m) * sin_l);
+                term += leg.p[n][m] * (coeffs.get_c(n, m) * cos_l + coeffs.get_s(n, m) * sin_l);
             }
             v += (self.r_ref / r).powi(n as i32) * term;
         }
         Some(self.mu / r * v)
     }
 }
-
