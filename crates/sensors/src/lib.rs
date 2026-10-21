@@ -1,1 +1,1 @@
-mod faults;
+pub mod faults;
