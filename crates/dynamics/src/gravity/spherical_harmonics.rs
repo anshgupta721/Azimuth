@@ -1,3 +1,5 @@
+use std::fs;
+
 #[derive(Debug, Clone)]
 pub struct HarmonicCoeffs {
     degree: usize,
