@@ -6,6 +6,60 @@ pub struct HarmonicCoeffs {
 }
 
 impl HarmonicCoeffs {
+    pub fn from_csv(file_name: &str, max_degree: Option<usize>) -> Result<Self, String> {
+        let text =
+            fs::read_to_string(file_name).map_err(|e| format!("cannot read {file_name}: {e}"))?;
+
+        let mut rows: Vec<(usize, usize, f64, f64)> = Vec::new();
+        let mut degree = 0;
+
+        for (line_no, line) in text.lines().enumerate() {
+            let line = line.trim();
+            if line.is_empty() || line.starts_with('#') {
+                continue;
+            }
+            let fields: Vec<&str> = line.split(',').map(str::trim).collect();
+            if fields.len() < 4 {
+                return Err(format!("line {}: expected at least 4 columns", line_no + 1));
+            }
+
+            // A first field that isn't an integer is treated as a header row.
+            let n: usize = match fields[0].parse() {
+                Ok(n) => n,
+                Err(_) if rows.is_empty() => continue,
+                Err(_) => return Err(format!("line {}: bad degree '{}'", line_no + 1, fields[0])),
+            };
+            let m: usize = fields[1]
+                .parse()
+                .map_err(|_| format!("line {}: bad order '{}'", line_no + 1, fields[1]))?;
+            let c: f64 = fields[2]
+                .parse()
+                .map_err(|_| format!("line {}: bad C '{}'", line_no + 1, fields[2]))?;
+            let s: f64 = fields[3]
+                .parse()
+                .map_err(|_| format!("line {}: bad S '{}'", line_no + 1, fields[3]))?;
+
+            if m > n {
+                return Err(format!("line {}: order {m} > degree {n}", line_no + 1));
+            }
+            if max_degree.is_some_and(|d| n > d) {
+                continue;
+            }
+            degree = degree.max(n);
+            rows.push((n, m, c, s));
+        }
+
+        if rows.is_empty() {
+            return Err(format!("{file_name}: no coefficient rows found"));
+        }
+
+        let mut coeffs = Self::zeros(degree);
+        for (n, m, c, s) in rows {
+            coeffs.set(n, m, c, s);
+        }
+        Ok(coeffs)
+    }
+
     pub fn zeros(degree: usize) -> Self {
         let c = (0..=degree).map(|n| vec![0.0; n + 1]).collect();
         let s = (0..=degree).map(|n| vec![0.0; n + 1]).collect();
