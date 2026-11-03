@@ -4,4 +4,5 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+fs = "0.0.6"
 nalgebra.workspace = true
