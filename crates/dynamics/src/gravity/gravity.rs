@@ -39,14 +39,13 @@ impl GravityField for PointMass {
 }
 
 pub struct SphericalHarmonics {
-    mu: f64,
     r_ref: f64,
     degree: usize,
 }
 
 impl SphericalHarmonics {
-    pub fn new(mu: f64, r_ref: f64, degree: usize) -> Self {
-        SphericalHarmonics { mu, r_ref, degree }
+    pub fn new(r_ref: f64, degree: usize) -> Self {
+        SphericalHarmonics { r_ref, degree }
     }
 
     fn spherical(pos: SVector<f64, 3>) -> (f64, f64, f64) {
@@ -59,6 +58,7 @@ impl SphericalHarmonics {
     pub fn acceleration_and_gradient(
         &self,
         pos_body_fixed: SVector<f64, 3>,
+        mu: f64,
         coeffs: &HarmonicCoeffs,
     ) -> (SVector<f64, 3>, SMatrix<f64, 3, 3>) {
         assert_eq!(
@@ -107,16 +107,16 @@ impl SphericalHarmonics {
             }
         }
 
-        let dv_dr = -self.mu / (r * r) * dv_dr;
-        let dv_dphi = self.mu / r * dv_dphi;
-        let dv_dlambda = self.mu / r * dv_dlambda;
+        let dv_dr = -mu / (r * r) * dv_dr;
+        let dv_dphi = mu / r * dv_dphi;
+        let dv_dlambda = mu / r * dv_dlambda;
 
-        let d2v_drr = self.mu / (r * r * r) * d2v_drr;
-        let d2v_drdphi = -self.mu / (r * r) * d2v_drdphi;
-        let d2v_drdlambda = -self.mu / (r * r) * d2v_drdlambda;
-        let d2v_dphiphi = self.mu / r * d2v_dphiphi;
-        let d2v_dphidlambda = self.mu / r * d2v_dphidlambda;
-        let d2v_dlambdalambda = -self.mu / r * d2v_dlambdalambda;
+        let d2v_drr = mu / (r * r * r) * d2v_drr;
+        let d2v_drdphi = -mu / (r * r) * d2v_drdphi;
+        let d2v_drdlambda = -mu / (r * r) * d2v_drdlambda;
+        let d2v_dphiphi = mu / r * d2v_dphiphi;
+        let d2v_dphidlambda = mu / r * d2v_dphidlambda;
+        let d2v_dlambdalambda = -mu / r * d2v_dlambdalambda;
 
         // Spherical -> local components
         let a_r = dv_dr;
@@ -154,7 +154,12 @@ impl SphericalHarmonics {
 
         ([ax, ay, az].into(), gradient)
     }
-    fn potential(&self, pos_body_fixed: SVector<f64, 3>, coeffs: HarmonicCoeffs) -> Option<f64> {
+    fn potential(
+        &self,
+        pos_body_fixed: SVector<f64, 3>,
+        mu: f64,
+        coeffs: HarmonicCoeffs,
+    ) -> Option<f64> {
         let (r, phi, lambda) = Self::spherical(pos_body_fixed);
         let leg = LegendreCache::new(coeffs.degree(), phi);
 
@@ -167,6 +172,6 @@ impl SphericalHarmonics {
             }
             v += (self.r_ref / r).powi(n as i32) * term;
         }
-        Some(self.mu / r * v)
+        Some(mu / r * v)
     }
 }
