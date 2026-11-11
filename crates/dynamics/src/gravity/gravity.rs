@@ -154,6 +154,79 @@ impl SphericalHarmonics {
 
         ([ax, ay, az].into(), gradient)
     }
+
+    pub const fn n_params(degree: usize) -> usize {
+        (degree + 1) * (degree + 1) - 4
+    }
+
+    pub const fn idx_c(degree: usize, order: usize) -> usize {
+        if order == 0 {
+            degree * degree - 4
+        } else {
+            degree * degree - 4 + 2 * order - 1
+        }
+    }
+
+    pub const fn idx_s(degree: usize, order: usize) -> usize {
+        degree * degree - 4 + 2 * order
+    }
+
+    // Output:
+    //      c20 c21 s21 c22 s22 c30 c31 s31 c32 s32 c33 s33
+    // ax: [.   .   .   .   .   .   .   .   .   .   .   .]
+    // ay: [.   .   .   .   .   .   .   .   .   .   .   .]
+    // az: [.   .   .   .   .   .   .   .   .   .   .   .]
+    pub fn acceleration_partials<const P: usize>(
+        &self,
+        pos_body_fixed: SVector<f64, 3>,
+        mu: f64,
+    ) -> SMatrix<f64, 3, P> {
+        // let r
+        let (r, phi, lambda) = Self::spherical(pos_body_fixed);
+        let leg = LegendreCache::new(self.degree, phi);
+
+        let (sin_phi, cos_phi) = phi.sin_cos();
+        let (sin_lam, cos_lam) = lambda.sin_cos();
+
+        let e_r = SVector::<f64, 3>::new(cos_phi * cos_lam, cos_phi * sin_lam, sin_phi);
+        let e_phi = SVector::<f64, 3>::new(-sin_phi * cos_lam, -sin_phi * sin_lam, cos_phi);
+        let e_lam = SVector::<f64, 3>::new(-sin_lam, cos_lam, 0.0);
+        let rot = SMatrix::<f64, 3, 3>::from_columns(&[e_r, e_phi, e_lam]);
+
+        let mut out = SMatrix::<f64, 3, P>::zeros();
+        for n in 2..=self.degree {
+            let rn = (self.r_ref / r).powi(n as i32);
+            let nf = n as f64;
+            for m in 0..=n {
+                let mf = m as f64;
+                let (sin_ml, cos_ml) = (m as f64 * lambda).sin_cos();
+
+                let dv_dr = -mu / (r * r) * rn * (nf + 1.0) * leg.p[n][m];
+                let dv_dphi = mu / (r * r) * rn * leg.dp[n][m];
+                let dv_dlambda = mu / (r * r * cos_phi) * rn * mf * leg.p[n][m];
+
+                let dCnm_dv_dr = dv_dr * cos_ml;
+                let dSnm_dv_dr = dv_dr * sin_ml;
+
+                let dCnm_dv_phi = dv_dphi * cos_ml;
+                let dSnm_dv_dphi = dv_dphi * sin_ml;
+
+                let dCnm_dv_dlambda = -dv_dlambda * sin_ml;
+                let dSnm_dv_dlambda = dv_dlambda * cos_ml;
+
+                let col_c: SVector<f64, 3> =
+                    rot * SVector::<f64, 3>::new(dCnm_dv_dr, dCnm_dv_phi, dCnm_dv_dlambda);
+                out.set_column(Self::idx_c(n, m), &col_c);
+                if m > 0 {
+                    let col_s: SVector<f64, 3> =
+                        rot * SVector::<f64, 3>::new(dSnm_dv_dr, dSnm_dv_dphi, dSnm_dv_dlambda);
+                    out.set_column(Self::idx_s(n, m), &col_s);
+                }
+            }
+        }
+        out
+    }
+
     fn potential(
         &self,
         pos_body_fixed: SVector<f64, 3>,
