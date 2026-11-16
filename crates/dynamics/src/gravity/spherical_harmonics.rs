@@ -1,5 +1,21 @@
 use std::fs;
 
+pub const fn n_parameters(degree: usize) -> usize {
+    (degree + 1) * (degree + 1) - 4
+}
+
+pub const fn idx_c(degree: usize, order: usize) -> usize {
+    if order == 0 {
+        degree * degree - 4
+    } else {
+        degree * degree - 4 + 2 * order - 1
+    }
+}
+
+pub const fn idx_s(degree: usize, order: usize) -> usize {
+    degree * degree - 4 + 2 * order
+}
+
 #[derive(Debug, Clone)]
 pub struct HarmonicCoeffs {
     degree: usize,
@@ -8,8 +24,23 @@ pub struct HarmonicCoeffs {
 }
 
 impl HarmonicCoeffs {
+    pub fn from_parameters(degree: usize, parameters: &[f64]) -> Self {
+        assert_eq!(parameters.len(), n_parameters(degree));
+        let mut coeffs = Self::zeros(degree);
+        coeffs.set(0, 0, 1.0, 0.0);
+        for n in 2..=degree {
+            for m in 0..=n {
+                let c = parameters[idx_c(n, m)];
+                let s = if m > 0 { parameters[idx_s(n, m)] } else { 0.0 };
+
+                coeffs.set(n, m, c, s);
+            }
+        }
+        coeffs
+    }
+
     pub fn from_csv(file_name: &str, max_degree: Option<usize>) -> Result<Self, String> {
-        let text =
+        let text: String =
             fs::read_to_string(file_name).map_err(|e| format!("cannot read {file_name}: {e}"))?;
 
         let mut rows: Vec<(usize, usize, f64, f64)> = Vec::new();

@@ -1,6 +1,9 @@
 use nalgebra::{SMatrix, SVector};
 
-use crate::gravity::spherical_harmonics::{HarmonicCoeffs, LegendreCache};
+use crate::gravity::spherical_harmonics::{
+    HarmonicCoeffs, LegendreCache, idx_c, idx_s, n_parameters,
+};
+
 pub trait GravityField {
     fn acceleration(&self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3>;
     /// Optional: f
@@ -155,22 +158,6 @@ impl SphericalHarmonics {
         ([ax, ay, az].into(), gradient)
     }
 
-    pub const fn n_params(degree: usize) -> usize {
-        (degree + 1) * (degree + 1) - 4
-    }
-
-    pub const fn idx_c(degree: usize, order: usize) -> usize {
-        if order == 0 {
-            degree * degree - 4
-        } else {
-            degree * degree - 4 + 2 * order - 1
-        }
-    }
-
-    pub const fn idx_s(degree: usize, order: usize) -> usize {
-        degree * degree - 4 + 2 * order
-    }
-
     // Output:
     //      c20 c21 s21 c22 s22 c30 c31 s31 c32 s32 c33 s33
     // ax: [.   .   .   .   .   .   .   .   .   .   .   .]
@@ -216,11 +203,11 @@ impl SphericalHarmonics {
 
                 let col_c: SVector<f64, 3> =
                     rot * SVector::<f64, 3>::new(dCnm_dv_dr, dCnm_dv_phi, dCnm_dv_dlambda);
-                out.set_column(Self::idx_c(n, m), &col_c);
+                out.set_column(idx_c(n, m), &col_c);
                 if m > 0 {
                     let col_s: SVector<f64, 3> =
                         rot * SVector::<f64, 3>::new(dSnm_dv_dr, dSnm_dv_dphi, dSnm_dv_dlambda);
-                    out.set_column(Self::idx_s(n, m), &col_s);
+                    out.set_column(idx_s(n, m), &col_s);
                 }
             }
         }
