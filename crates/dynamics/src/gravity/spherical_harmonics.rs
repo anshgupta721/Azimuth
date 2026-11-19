@@ -39,6 +39,19 @@ impl HarmonicCoeffs {
         coeffs
     }
 
+    pub fn to_parameters(&self) -> Vec<f64> {
+        let mut p = vec![0.0; n_parameters(self.degree)];
+        for n in 2..=self.degree {
+            for m in 0..=n {
+                p[idx_c(n, m)] = self.c[n][m];
+                if m > 0 {
+                    p[idx_s(n, m)] = self.s[n][m];
+                }
+            }
+        }
+        p
+    }
+
     pub fn from_csv(file_name: &str, max_degree: Option<usize>) -> Result<Self, String> {
         let text: String =
             fs::read_to_string(file_name).map_err(|e| format!("cannot read {file_name}: {e}"))?;
