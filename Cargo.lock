@@ -66,6 +66,9 @@ dependencies = [
 [[package]]
 name = "estimation"
 version = "0.1.0"
+dependencies = [
+ "nalgebra",
+]
 
 [[package]]
 name = "frames"
