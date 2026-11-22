@@ -1,7 +1,12 @@
 use std::fs;
 
-pub const fn n_parameters(degree: usize) -> usize {
+pub const fn length_from_degree(degree: usize) -> usize {
     (degree + 1) * (degree + 1) - 4
+}
+
+pub fn degree_from_length(length: usize) -> usize {
+    let k = ((length + 4) as f64).sqrt().round() as usize;
+    k - 1
 }
 
 pub const fn idx_c(degree: usize, order: usize) -> usize {
@@ -25,7 +30,7 @@ pub struct HarmonicCoeffs {
 
 impl HarmonicCoeffs {
     pub fn from_parameters(degree: usize, parameters: &[f64]) -> Self {
-        assert_eq!(parameters.len(), n_parameters(degree));
+        assert_eq!(parameters.len(), length_from_degree(degree));
         let mut coeffs = Self::zeros(degree);
         coeffs.set(0, 0, 1.0, 0.0);
         for n in 2..=degree {
