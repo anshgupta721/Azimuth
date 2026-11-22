@@ -29,6 +29,12 @@ pub struct HarmonicCoeffs {
 }
 
 impl HarmonicCoeffs {
+    pub fn from_gravity_vector(g: &[f64]) -> (f64, Self) {
+        let (mu, params) = g.split_first().expect("empty gravity vector");
+        let degree = degree_from_length(params.len());
+        (*mu, Self::from_parameters(degree, params))
+    }
+
     pub fn from_parameters(degree: usize, parameters: &[f64]) -> Self {
         assert_eq!(parameters.len(), length_from_degree(degree));
         let mut coeffs = Self::zeros(degree);
@@ -45,7 +51,7 @@ impl HarmonicCoeffs {
     }
 
     pub fn to_parameters(&self) -> Vec<f64> {
-        let mut p = vec![0.0; n_parameters(self.degree)];
+        let mut p = vec![0.0; length_from_degree(self.degree)];
         for n in 2..=self.degree {
             for m in 0..=n {
                 p[idx_c(n, m)] = self.c[n][m];
