@@ -1,8 +1,6 @@
 use nalgebra::{SMatrix, SVector};
 
-use crate::gravity::spherical_harmonics::{
-    HarmonicCoeffs, LegendreCache, idx_c, idx_s, n_parameters,
-};
+use crate::gravity::spherical_harmonics::{HarmonicCoeffs, LegendreCache, idx_c, idx_s};
 
 pub trait GravityField {
     fn acceleration(&self, pos_body_fixed: SVector<f64, 3>) -> SVector<f64, 3>;
